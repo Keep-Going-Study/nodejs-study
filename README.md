@@ -1,2 +1,2 @@
-# Node.JS_Study
+# Node.js_Study
 My first Node.js Study
