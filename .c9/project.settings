@@ -1,4 +1,7 @@
 {
+    "instance": {
+        "@automaticShutdown": "never"
+    },
     "language": {
         "tern_defs": {
             "json()": {
