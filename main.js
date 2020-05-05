@@ -13,24 +13,26 @@ app.listen(process.env.PORT , function(){
 
 var http = require('http');
 var fs = require('fs');
+var url = require('url'); // url 모듈을 변수에 저장
+
 var app = http.createServer(function(request,response){
-var url = request.url;
-if(request.url == '/'){
-    url = '/index.html';
-    }
-if(request.url == '/favicon.ico'){
-      response.writeHead(404);
-      response.end();
-      return;
-    }
-    
+    var _url = request.url;
+    var queryData = url.parse(_url,true).query;
+    // queryData 에는 쿼리스트링이 객체타입으로 저장됨
+    console.log(queryData.id);
+    if(_url == '/'){
+        _url = '/index.html';
+        }
+    if(_url == '/favicon.ico'){
+          response.writeHead(404);
+          response.end();
+          return;
+        }
     response.writeHead(200);
-    response.end(fs.readFileSync(__dirname + url));
+    response.end(queryData.id);
  
 });
-app.listen(process.env.PORT);
-
-
+app.listen(80);
 
 
 
