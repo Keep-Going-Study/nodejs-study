@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url'); // url 모듈을 변수에 저장
+var qs = require("querystring");
 
 // 본문 출력
 function templateHTML(title, list, body){
@@ -78,7 +79,7 @@ var app = http.createServer(function(request,response){
             var list = templateList(filelist);
             var title = 'WEB - create';
             var template = templateHTML(title,list,`
-                <form action="/process_create" method="post">
+                <form action="/create_process" method="post">
                     <p><input type="text" name="title" placeholder="title"></p>
                     <p>
                         <textarea name="description" placeholder="description"></textarea>
@@ -92,6 +93,20 @@ var app = http.createServer(function(request,response){
             response.end(template);
             
         });
+    }
+    else if(pathname === '/create_process'){
+        var body = '';
+        request.on('data', function(data){
+            body += data;
+        });
+        request.on('end',function(){
+            var post = qs.parse(body);
+            console.log(post);
+            var title = post.title;
+            var description = post.description;
+        });
+        response.writeHead(200);
+        response.end('success');
     }
     
     else{ // 접속경로(path)가 루트가 아니라면..
