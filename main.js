@@ -2,6 +2,7 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url'); // url 모듈을 변수에 저장
 
+// 본문 출력
 function templateHTML(title, list, body){
     return `
             <!doctype html>
@@ -13,12 +14,15 @@ function templateHTML(title, list, body){
             <body>
                 <h1><a href="/">WEB</a></h1>
                 ${list}
+                <a href="/create">create</a>
                 ${body}
             </body>
           </html>
           `;
 }
 
+// fs.readdir() 로 filelist 를 받아서 파라미터로 넘겨줌
+// 파일목록을 출력
 function templateList(filelist){
     var list = '<ul>';
     var i=0;
@@ -65,7 +69,30 @@ var app = http.createServer(function(request,response){
                 response.end(template);
             });
         });
-    } 
+    }
+    else if(pathname === '/create'){ // 접속경로가 create 일 때..
+        
+        // data 폴더 안에 있는 파일목록(filelist)을 배열형식으로 불러옴.
+        // filelist 를 동적으로 표현하기 위해 list 라는 변수 설정
+        fs.readdir('./data', function(error, filelist){
+            var list = templateList(filelist);
+            var title = 'WEB - create';
+            var template = templateHTML(title,list,`
+                <form action="/process_crate" method="post">
+                    <p><input type="text" name="title" placeholder="title"></p>
+                    <p>
+                        <textarea name="description" placeholder="description"></textarea>
+                    </p>
+                    <p>
+                        <input type="submit">
+                    </p>
+                </form>
+            `);
+            response.writeHead(200);
+            response.end(template);
+            
+        });
+    }
     
     else{ // 접속경로(path)가 루트가 아니라면..
       response.writeHead(404);
@@ -74,7 +101,7 @@ var app = http.createServer(function(request,response){
     
 
 });
-app.listen(80);
+app.listen(8080);
 
 
 
