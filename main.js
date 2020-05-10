@@ -78,7 +78,7 @@ var app = http.createServer(function(request,response){
             var list = templateList(filelist);
             var title = 'WEB - create';
             var template = templateHTML(title,list,`
-                <form action="/process_crate" method="post">
+                <form action="/process_create" method="post">
                     <p><input type="text" name="title" placeholder="title"></p>
                     <p>
                         <textarea name="description" placeholder="description"></textarea>
