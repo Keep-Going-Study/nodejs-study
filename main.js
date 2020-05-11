@@ -4,7 +4,7 @@ var url = require('url'); // url 모듈을 변수에 저장
 var qs = require("querystring");
 
 // 본문 출력
-function templateHTML(title, list, body){
+function templateHTML(title, list, body, control){
     return `
             <!doctype html>
             <html>
@@ -15,7 +15,7 @@ function templateHTML(title, list, body){
             <body>
                 <h1><a href="/">WEB</a></h1>
                 ${list}
-                <a href="/create">create</a>
+                ${control}
                 ${body}
             </body>
           </html>
@@ -59,13 +59,19 @@ var app = http.createServer(function(request,response){
             
                     var title = "Welcome";
                     description = "Hello, Node.js";
+                    var template = templateHTML(title,list,`<h2>${title}</h2>${description}`,
+                        `<a href="/create">create</a>`);
+                    // 홈페이지에선 create 버튼만 보이게끔
                 }
         
                 else{ // ?id=HTML,CSS,JavaScript 에 접속할 때
                     var title = queryData.id;
+                    var template = templateHTML(title,list,`<h2>${title}</h2>${description}`,
+                        `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`);
+                    // 콘텐츠 페이지에선 create 와 update 버튼이 보이게끔
                 }
           
-                var template = templateHTML(title,list,`<h2>${title}</h2>${description}`);
+                
                 response.writeHead(200);
                 response.end(template);
             });
@@ -88,7 +94,7 @@ var app = http.createServer(function(request,response){
                         <input type="submit">
                     </p>
                 </form>
-            `);
+            `,``);
             response.writeHead(200);
             response.end(template);
             
@@ -101,12 +107,16 @@ var app = http.createServer(function(request,response){
         });
         request.on('end',function(){
             var post = qs.parse(body);
-            console.log(post);
+            //console.log(post);
             var title = post.title;
             var description = post.description;
+            
+            fs.writeFile(`data/${title}`, description, 'utf8', function(err){
+                response.writeHead(302, {Location: `/?id=${title}`});
+                response.end();
+            });
         });
-        response.writeHead(200);
-        response.end('success');
+        
     }
     
     else{ // 접속경로(path)가 루트가 아니라면..
