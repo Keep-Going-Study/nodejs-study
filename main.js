@@ -67,7 +67,15 @@ var app = http.createServer(function(request,response){
                 else{ // 컨텐츠페이지( ex. ?id=HTML,CSS,JavaScript ) 에 접속할 때
                     var title = queryData.id;
                     var template = templateHTML(title,list,`<h2>${title}</h2>${description}`,
-                        `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`);
+                        `<a href="/create">create</a> 
+                        <a href="/update?id=${title}">update</a>
+                        <form action="/delete_process" method="post" 
+                                onsubmit='return confirm("삭제하시겠습니까?")'>
+                            <input type="hidden" name="id" value="${title}">
+                            <input type="submit" value="delete">
+                        </form>
+                        `
+                    );
                     // 컨텐츠 페이지에선 create 와 update 버튼이 보이게끔
                 }
           
@@ -146,11 +154,11 @@ var app = http.createServer(function(request,response){
             body += data;
         });
         request.on('end',function(){
-            var post = qs.parse(body);
+            var post = qs.parse(body);  // 쿼리스트링을 객체 형식으로 리턴
             var id = post.id;
             var title = post.title;
             var description = post.description;
-            //console.log(post);
+            //console.dir(post);
             
             // 파일이름 수정하기 : fs.rename('old path','new path',callback);
             fs.rename(`data/${id}`, `data/${title}`, function(error){
