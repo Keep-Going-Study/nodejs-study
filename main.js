@@ -140,6 +140,30 @@ var app = http.createServer(function(request,response){
             });        
         });
     }
+    else if(pathname === '/update_process'){
+        var body = '';
+        request.on('data', function(data){
+            body += data;
+        });
+        request.on('end',function(){
+            var post = qs.parse(body);
+            var id = post.id;
+            var title = post.title;
+            var description = post.description;
+            //console.log(post);
+            
+            // 파일이름 수정하기 : fs.rename('old path','new path',callback);
+            fs.rename(`data/${id}`, `data/${title}`, function(error){
+               
+                fs.writeFile(`data/${title}`, description, 'utf8', function(err){
+                    response.writeHead(302, {Location: `/?id=${title}`});
+                    response.end();
+                }); 
+            });
+            
+            
+        });
+    }
     
     else{ // 접속경로(path)가 루트가 아니라면..
       response.writeHead(404);
