@@ -76,7 +76,8 @@ var app = http.createServer(function(request,response){
                         </form>
                         `
                     );
-                    // 컨텐츠 페이지에선 create 와 update 버튼이 보이게끔
+                    // 컨텐츠 페이지에선 create 와 update 링크가 보이게끔
+                    // delete 버튼도 보이게끔함.
                 }
           
                 
@@ -148,7 +149,7 @@ var app = http.createServer(function(request,response){
             });        
         });
     }
-    else if(pathname === '/update_process'){
+    else if(pathname === '/update_process'){ // update 처리
         var body = '';
         request.on('data', function(data){
             body += data;
@@ -168,6 +169,24 @@ var app = http.createServer(function(request,response){
                     response.end();
                 }); 
             });
+            
+            
+        });
+    }
+    else if(pathname === '/delete_process'){ // delete 처리
+        var body = '';
+        request.on('data', function(data){
+            body += data;
+        });
+        request.on('end',function(){
+            var post = qs.parse(body);  // 쿼리스트링을 객체 형식으로 리턴
+            var id = post.id;
+            
+            fs.unlink(`data/${id}`,function(error){
+                response.writeHead(302, {Location: `/`});
+                response.end();
+            })
+           
             
             
         });
