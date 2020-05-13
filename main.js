@@ -3,7 +3,42 @@ var fs = require('fs');
 var url = require('url'); // url 모듈을 변수에 저장
 var qs = require("querystring");
 
-// 본문 출력
+
+// 템플릿 양식 관련 함수 객체에 저장
+var template = {
+    HTML : function(title, list, body, control){
+            return `
+                <!doctype html>
+                <html>
+                <head>
+                    <title>WEB1 - ${title}</title>
+                    <meta charset="utf-8">
+                </head>
+                <body>
+                    <h1><a href="/">WEB</a></h1>
+                    ${list}
+                    ${control}
+                    ${body}
+                </body>
+              </html>
+              `;
+            },
+            
+    List : function(filelist){
+                var list = '<ul>';
+                var i=0;
+                while(i < filelist.length){
+                    list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
+                    i++;
+                }
+                list += '</ul>';
+                
+                return list;
+             }
+            
+    }
+
+/* 리팩토링 이전 함수들 
 function templateHTML(title, list, body, control){
     return `
             <!doctype html>
@@ -35,6 +70,7 @@ function templateList(filelist){
     
     return list;
 }
+*/
 
 var app = http.createServer(function(request,response){
     var _url = request.url;
@@ -52,21 +88,21 @@ var app = http.createServer(function(request,response){
         // data 폴더 안에 있는 파일목록(filelist)을 배열형식으로 불러옴.
         // filelist 를 동적으로 표현하기 위해 list 라는 변수 설정
         fs.readdir('./data', function(error, filelist){
-            var list = templateList(filelist);   
+            var list = template.List(filelist);   
         
             fs.readFile(`data/${queryData.id}`, 'utf8', function(err, description){
                 if(queryData.id === undefined){ // 쿼리스트링이 없다면.. (= 홈페이지(WEB)에 접속했다면..)
             
                     var title = "Welcome";
                     description = "Hello, Node.js";
-                    var template = templateHTML(title,list,`<h2>${title}</h2>${description}`,
+                    var html = template.HTML(title,list,`<h2>${title}</h2>${description}`,
                         `<a href="/create">create</a>`);
                     // 홈페이지에선 create 버튼만 보이게끔
                 }
         
                 else{ // 컨텐츠페이지( ex. ?id=HTML,CSS,JavaScript ) 에 접속할 때
                     var title = queryData.id;
-                    var template = templateHTML(title,list,`<h2>${title}</h2>${description}`,
+                    var html = template.HTML(title,list,`<h2>${title}</h2>${description}`,
                         `<a href="/create">create</a> 
                         <a href="/update?id=${title}">update</a>
                         <form action="/delete_process" method="post" 
@@ -82,7 +118,7 @@ var app = http.createServer(function(request,response){
           
                 
                 response.writeHead(200);
-                response.end(template);
+                response.end(html);
             });
         });
     }
@@ -91,9 +127,9 @@ var app = http.createServer(function(request,response){
         // data 폴더 안에 있는 파일목록(filelist)을 배열형식으로 불러옴.
         // filelist 를 동적으로 표현하기 위해 list 라는 변수 설정
         fs.readdir('./data', function(error, filelist){
-            var list = templateList(filelist);
+            var list = template.List(filelist);
             var title = 'WEB - create';
-            var template = templateHTML(title,list,`
+            var html = template.HTML(title,list,`
                 <form action="/create_process" method="post">
                     <p><input type="text" name="title" placeholder="title"></p>
                     <p>
@@ -105,7 +141,7 @@ var app = http.createServer(function(request,response){
                 </form>
             `,``);
             response.writeHead(200);
-            response.end(template);
+            response.end(html);
             
         });
     }
@@ -131,8 +167,8 @@ var app = http.createServer(function(request,response){
         fs.readdir('data',function(error,filelist){
             fs.readFile(`data/${queryData.id}`, 'utf8', function(err,description){
                 var title = queryData.id;
-                var list = templateList(filelist);
-                var template = templateHTML(title,list,` 
+                var list = template.List(filelist);
+                var html = template.HTML(title,list,` 
                     <form action="/update_process" method="post">
                      <input type="hidden" name="id" value="${title}">
                       <p><input type="text" name="title" placeholder="title" value="${title}"></p>
@@ -145,7 +181,7 @@ var app = http.createServer(function(request,response){
                     </form>`,
                     `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`);
                 response.writeHead(200);
-                response.end(template);
+                response.end(html);
             });        
         });
     }
