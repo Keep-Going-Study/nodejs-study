@@ -3,40 +3,8 @@ var fs = require('fs');
 var url = require('url'); // url 모듈을 변수에 저장
 var qs = require("querystring");
 
+var template = require('./lib/template_module.js');
 
-// 템플릿 양식 관련 함수 객체에 저장
-var template = {
-    HTML : function(title, list, body, control){
-            return `
-                <!doctype html>
-                <html>
-                <head>
-                    <title>WEB1 - ${title}</title>
-                    <meta charset="utf-8">
-                </head>
-                <body>
-                    <h1><a href="/">WEB</a></h1>
-                    ${list}
-                    ${control}
-                    ${body}
-                </body>
-              </html>
-              `;
-            },
-            
-    List : function(filelist){
-                var list = '<ul>';
-                var i=0;
-                while(i < filelist.length){
-                    list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
-                    i++;
-                }
-                list += '</ul>';
-                
-                return list;
-             }
-            
-    }
 
 /* 리팩토링 이전 함수들 
 function templateHTML(title, list, body, control){
