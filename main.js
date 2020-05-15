@@ -4,6 +4,7 @@ var url = require('url'); // url 모듈을 변수에 저장
 var qs = require("querystring");
 
 var template = require('./lib/template_module.js');
+var path = require('path');
 
 
 /* 리팩토링 이전 함수들 
@@ -56,9 +57,12 @@ var app = http.createServer(function(request,response){
         // data 폴더 안에 있는 파일목록(filelist)을 배열형식으로 불러옴.
         // filelist 를 동적으로 표현하기 위해 list 라는 변수 설정
         fs.readdir('./data', function(error, filelist){
-            var list = template.List(filelist);   
+            var list = template.List(filelist); 
+            console.dir(path.parse(`${queryData.id}`));
+            var filteredId = path.parse(`${queryData.id}`).base;
+            
         
-            fs.readFile(`data/${queryData.id}`, 'utf8', function(err, description){
+            fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
                 if(queryData.id === undefined){ // 쿼리스트링이 없다면.. (= 홈페이지(WEB)에 접속했다면..)
             
                     var title = "Welcome";
@@ -133,7 +137,8 @@ var app = http.createServer(function(request,response){
     }
     else if(pathname === '/update'){
         fs.readdir('data',function(error,filelist){
-            fs.readFile(`data/${queryData.id}`, 'utf8', function(err,description){
+            var filteredId = path.parse(queryData.id).base;
+            fs.readFile(`data/${filteredId}`, 'utf8', function(err,description){
                 var title = queryData.id;
                 var list = template.List(filelist);
                 var html = template.HTML(title,list,` 
@@ -185,8 +190,8 @@ var app = http.createServer(function(request,response){
         request.on('end',function(){
             var post = qs.parse(body);  // 쿼리스트링을 객체 형식으로 리턴
             var id = post.id;
-            
-            fs.unlink(`data/${id}`,function(error){
+            var filteredId = path.parse(id).base;
+            fs.unlink(`data/${filteredId}`,function(error){
                 response.writeHead(302, {Location: `/`});
                 response.end();
             })
