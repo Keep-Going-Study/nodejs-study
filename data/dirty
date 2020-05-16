@@ -1,0 +1,4 @@
+<h1>this is dirty</h1>
+sanitize script code
+<script>alert("merong");</script>
+end.

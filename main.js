@@ -5,6 +5,7 @@ var qs = require("querystring");
 
 var template = require('./lib/template_module.js');
 var path = require('path');
+var sanitizeHTML = require("sanitize-html");
 
 
 /* 리팩토링 이전 함수들 
@@ -58,7 +59,7 @@ var app = http.createServer(function(request,response){
         // filelist 를 동적으로 표현하기 위해 list 라는 변수 설정
         fs.readdir('./data', function(error, filelist){
             var list = template.List(filelist); 
-            console.dir(path.parse(`${queryData.id}`));
+            //console.dir(path.parse(`${queryData.id}`));
             var filteredId = path.parse(`${queryData.id}`).base;
             
         
@@ -74,12 +75,21 @@ var app = http.createServer(function(request,response){
         
                 else{ // 컨텐츠페이지( ex. ?id=HTML,CSS,JavaScript ) 에 접속할 때
                     var title = queryData.id;
-                    var html = template.HTML(title,list,`<h2>${title}</h2>${description}`,
+                    
+                    // sanitize-html 모듈 사용
+                    // 사용자가 컨텐츠에 <script> 같은 위험성 있는 태그를 입력하면
+                    // 출력 시 <script> 태그를 검열삭제한다.
+                    var sanitizedTitle = sanitizeHTML(title);
+                    var sanitizedDescription = sanitizeHTML(description, {
+                        allowedTags:['h1']
+                    }); // h1 태그는 allow 시킴
+                    
+                    var html = template.HTML(sanitizedTitle,list,`<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
                         `<a href="/create">create</a> 
-                        <a href="/update?id=${title}">update</a>
+                        <a href="/update?id=${sanitizedTitle}">update</a>
                         <form action="/delete_process" method="post" 
                                 onsubmit='return confirm("삭제하시겠습니까?")'>
-                            <input type="hidden" name="id" value="${title}">
+                            <input type="hidden" name="id" value="${sanitizedTitle}">
                             <input type="submit" value="delete">
                         </form>
                         `
