@@ -7,6 +7,16 @@ var template = require('./lib/template_module.js');
 var path = require('path');
 var sanitizeHTML = require("sanitize-html");
 
+var mysql = require('mysql');
+
+var db = mysql.createConnection({
+    host : 'localhost', // host : 데이터베이스 서버의 주소
+    user : 'soul4927',
+    password : '9815chs',
+    database : 'opentutorials' // 사용하려는 database ( USE 문이랑 같은 기능 ) 
+});
+
+db.connect(); // mysql 서버에 연결
 
 /* 리팩토링 이전 함수들 
 function templateHTML(title, list, body, control){
@@ -55,6 +65,7 @@ var app = http.createServer(function(request,response){
     
     if(pathname == '/'){ // 접속경로(path)가 루트라면..
        
+       /*
         // data 폴더 안에 있는 파일목록(filelist)을 배열형식으로 불러옴.
         // filelist 를 동적으로 표현하기 위해 list 라는 변수 설정
         fs.readdir('./data', function(error, filelist){
@@ -103,7 +114,15 @@ var app = http.createServer(function(request,response){
                 response.end(html);
             });
         });
+        */
+        
+        db.query(`SELECT * FROM topic`, function(error,topics){
+            console.log(topics);
+            response.writeHead(200);
+            response.end('Success');
+        });
     }
+    
     else if(pathname === '/create'){ // 접속경로가 create 일 때..
         
         // data 폴더 안에 있는 파일목록(filelist)을 배열형식으로 불러옴.
