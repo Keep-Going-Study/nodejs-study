@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Keep-Going-HyeonSoo/Node.js_Study#readme",
   "dependencies": {
+    "mysql": "^2.18.1",
     "sanitize-html": "^1.23.0"
   }
 }

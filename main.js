@@ -61,7 +61,7 @@ var app = http.createServer(function(request,response){
             var list = template.List(filelist); 
             //console.dir(path.parse(`${queryData.id}`));
             var filteredId = path.parse(`${queryData.id}`).base;
-            
+            // 입력정보에 대한 보안 설정(부모디렉토리로 못가게함)
         
             fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
                 if(queryData.id === undefined){ // 쿼리스트링이 없다면.. (= 홈페이지(WEB)에 접속했다면..)
