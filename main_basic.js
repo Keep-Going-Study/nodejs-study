@@ -7,16 +7,6 @@ var template = require('./lib/template_module.js');
 var path = require('path');
 var sanitizeHTML = require("sanitize-html");
 
-var mysql = require('mysql');
-
-var db = mysql.createConnection({
-    host : 'localhost', // host : 데이터베이스 서버의 주소
-    user : 'soul4927',
-    password : '9815chs',
-    database : 'opentutorials' // 사용하려는 database ( USE 문이랑 같은 기능 ) 
-});
-
-db.connect(); // mysql 서버에 연결
 
 /* 리팩토링 이전 함수들 
 function templateHTML(title, list, body, control){
@@ -36,7 +26,6 @@ function templateHTML(title, list, body, control){
           </html>
           `;
 }
-
 // fs.readdir() 로 filelist 를 받아서 파라미터로 넘겨줌
 // 파일목록을 출력
 function templateList(filelist){
@@ -58,7 +47,6 @@ var app = http.createServer(function(request,response){
     //  ex ) http://localhost:3000/?id=HTML => request.url == /?id=HTML
     var queryData = url.parse(_url,true).query;
     // queryData 에는 쿼리스트링이 객체타입으로 저장됨
-    // { id : 'HTML' }
      
     
     //console.log(url.parse(_url,true));
@@ -66,65 +54,62 @@ var app = http.createServer(function(request,response){
     
     if(pathname == '/'){ // 접속경로(path)가 루트라면..
        
-        // 쿼리스트링의 id 값이 없을 때 ( = 메인페이지에 접속했을 때)
-        if(queryData.id === undefined){ 
-            // 목록들 출력하는 기능
-            db.query(`SELECT * FROM topic`, function(error,topics){
-                //console.log(topics);
-                var title = 'Welcome';
-                var description = 'Hello, Node.js';
-                var list = template.List(topics);
-                var html = template.HTML(title,list,
-                            `<h2>${title}</h2>${description}`,
-                            `<a href="/create">create</a>`);
-                // 홈페이지에선 create 버튼만 보이게끔
+        // data 폴더 안에 있는 파일목록(filelist)을 배열형식으로 불러옴.
+        // filelist 를 동적으로 표현하기 위해 list 라는 변수 설정
+        fs.readdir('./data', function(error, filelist){
+            var list = template.List(filelist); 
+            //console.dir(path.parse(`${queryData.id}`));
+            var filteredId = path.parse(`${queryData.id}`).base;
+            
+        
+            fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
+                if(queryData.id === undefined){ // 쿼리스트링이 없다면.. (= 홈페이지(WEB)에 접속했다면..)
+            
+                    var title = "Welcome";
+                    description = "Hello, Node.js";
+                    var html = template.HTML(title,list,`<h2>${title}</h2>${description}`,
+                        `<a href="/create">create</a>`);
+                    // 홈페이지에선 create 버튼만 보이게끔
+                }
+        
+                else{ // 컨텐츠페이지( ex. ?id=HTML,CSS,JavaScript ) 에 접속할 때
+                    var title = queryData.id;
+                    
+                    // sanitize-html 모듈 사용
+                    // 사용자가 컨텐츠에 <script> 같은 위험성 있는 태그를 입력하면
+                    // 출력 시 <script> 태그를 검열삭제한다.
+                    var sanitizedTitle = sanitizeHTML(title);
+                    var sanitizedDescription = sanitizeHTML(description, {
+                        allowedTags:['h1']
+                    }); // h1 태그는 allow 시킴
+                    
+                    var html = template.HTML(sanitizedTitle,list,`<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
+                        `<a href="/create">create</a> 
+                        <a href="/update?id=${sanitizedTitle}">update</a>
+                        <form action="/delete_process" method="post" 
+                                onsubmit='return confirm("삭제하시겠습니까?")'>
+                            <input type="hidden" name="id" value="${sanitizedTitle}">
+                            <input type="submit" value="delete">
+                        </form>
+                        `
+                    );
+                    // 컨텐츠 페이지에선 create 와 update 링크가 보이게끔
+                    // delete 버튼도 보이게끔함.
+                }
+          
+                
                 response.writeHead(200);
                 response.end(html);
             });
-        }
-        
-        // 쿼리스트링의 id 값이 있을 때 ( = 컨텐츠페이지에 접속했을 때)
-        // ( ex. ?id=HTML,CSS,JavaScript ) 
-        else{
-            
-            db.query(`SELECT * FROM topic`, function(error,topics){ // 전체 목록 출력
-                if(error){
-                    throw error;
-                }
-                // 해당 컨텐츠 상세보기 출력하는 함수
-                db.query(`SELECT * FROM topic WHERE id=?`,[queryData.id],function(error2,topic){
-                   if(error2){
-                       throw error2;
-                   } 
-                    console.log(topic);
-                    var title = topic[0].title;
-                    var description = topic[0].description; // 컨텐츠 내용
-                    var list = template.List(topics); // topics : 전체 목록 데이터가 있는 테이블
-                    var html = template.HTML(title,list,
-                                `<h2>${title}</h2>${description}`,
-                                `<a href="/create">create</a>
-                                <a href="/update?id=${queryData.id}">update</a>
-                                <form action="/delete_process" method="post" 
-                                        onsubmit='return confirm("삭제하시겠습니까?")'>
-                                  <input type="hidden" name="id" value="${queryData.id}">
-                                  <input type="submit" value="delete">
-                                </form>`);
-                    response.writeHead(200);
-                    response.end(html);
-                    });
-
-                });
-            }
+        });
     }
-    
     else if(pathname === '/create'){ // 접속경로가 create 일 때..
         
-
-        // 목록들 출력과 create form 생성하는 기능
-        db.query(`SELECT * FROM topic`, function(error,topics){
-            //console.log(topics);
-            var title = 'Create';
-            var list = template.List(topics);
+        // data 폴더 안에 있는 파일목록(filelist)을 배열형식으로 불러옴.
+        // filelist 를 동적으로 표현하기 위해 list 라는 변수 설정
+        fs.readdir('./data', function(error, filelist){
+            var list = template.List(filelist);
+            var title = 'WEB - create';
             var html = template.HTML(title,list,`
                 <form action="/create_process" method="post">
                     <p><input type="text" name="title" placeholder="title"></p>
@@ -135,37 +120,27 @@ var app = http.createServer(function(request,response){
                         <input type="submit">
                     </p>
                 </form>
-                `,
-                `<a href="/create">create</a>`);
-            
+            `,``);
             response.writeHead(200);
             response.end(html);
+            
         });
     }
     else if(pathname === '/create_process'){
         var body = '';
-        
-        // data 이벤트 : request data가 넘어올 때 발생
         request.on('data', function(data){
-            body += data;   // 변수 body 에는 request한 폼 데이터가 담겨져있음
-            console.log("data : ",data);
-            console.log("body : ",body);
+            body += data;
         });
         request.on('end',function(){
             var post = qs.parse(body);
-            console.log("post : ",post);
+            //console.log(post);
+            var title = post.title;
+            var description = post.description;
             
-            db.query(`
-                INSERT INTO topic (title, description, created, author_id)
-                 VALUES(?, ?, NOW(), ?)`,
-                 [post.title, post.description, 1],
-                 function(error,result){
-                     if(error){
-                         throw error;
-                     }
-                     response.writeHead(302, {Location: `/?id=${result.insertId}`});
-                     response.end();
-                 })
+            fs.writeFile(`data/${title}`, description, 'utf8', function(err){
+                response.writeHead(302, {Location: `/?id=${title}`});
+                response.end();
+            });
         });
         
     }
@@ -243,6 +218,3 @@ var app = http.createServer(function(request,response){
 
 });
 app.listen(8080);
-
-
-
