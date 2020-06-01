@@ -193,7 +193,9 @@ var app = http.createServer(function(request,response){
                         <input type="submit">
                       </p>
                     </form>`,
-                    `<a href="/create">create</a> <a href="/update?id=${topic[0].id}">update</a>`);
+                    `<a href="/create">create</a> <a href="/update?id=${topic[0].id}">update</a>`); 
+                    // /update 뒤에 쿼리스트링을 붙힘으로써 각 페이지마다 독립적으로 update를 처리할 수 있음
+                    // ex ) /update?id=1
                     
                 response.writeHead(200);
                 response.end(html);
@@ -228,15 +230,16 @@ var app = http.createServer(function(request,response){
         });
         request.on('end',function(){
             var post = qs.parse(body);  // 쿼리스트링을 객체 형식으로 리턴
-            var id = post.id;
-            var filteredId = path.parse(id).base;
-            fs.unlink(`data/${filteredId}`,function(error){
+            
+            db.query('DELETE FROM topic WHERE id=?', [post.id], function(error,result){
+                if(error){
+                    throw error;
+                }
+                
                 response.writeHead(302, {Location: `/`});
                 response.end();
-            })
-           
-            
-            
+                
+            });
         });
     }
     
