@@ -126,24 +126,35 @@ var app = http.createServer(function(request,response){
 
         // 목록들 출력과 create form 생성하는 기능
         db.query(`SELECT * FROM topic`, function(error,topics){
-            //console.log(topics);
-            var title = 'Create';
-            var list = template.List(topics);
-            var html = template.HTML(title,list,`
-                <form action="/create_process" method="post">
-                    <p><input type="text" name="title" placeholder="title"></p>
-                    <p>
-                        <textarea name="description" placeholder="description"></textarea>
-                    </p>
-                    <p>
-                        <input type="submit">
-                    </p>
-                </form>
-                `,
-                `<a href="/create">create</a>`);
             
-            response.writeHead(200);
-            response.end(html);
+            // 저자 정보를 create 시 고를 수 있게끔 author 테이블 불러옴
+            db.query('SELECT * FROM author', function(error2, authors){
+                
+                //console.log(topics);
+            
+                var title = 'Create';
+                var list = template.List(topics);
+                var html = template.HTML(title,list,
+                    `
+                    <form action="/create_process" method="post">
+                        <p><input type="text" name="title" placeholder="title"></p>
+                        <p>
+                            <textarea name="description" placeholder="description"></textarea>
+                        </p>
+                        <p>
+                            ${template.authorSelect(authors)}
+                        </p>
+                        <p>
+                            <input type="submit">
+                        </p>
+                    </form>
+                    `,
+                    `<a href="/create">create</a>`);
+                
+                response.writeHead(200);
+                response.end(html);
+                });
+            
         });
     }
     else if(pathname === '/create_process'){
@@ -157,12 +168,13 @@ var app = http.createServer(function(request,response){
         });
         request.on('end',function(){
             var post = qs.parse(body);
-            //console.log("post : ",post);
+            console.log("post : ",post);
+            console.log("post.author : ",post.author);
             
             db.query(`
                 INSERT INTO topic (title, description, created, author_id)
                  VALUES(?, ?, NOW(), ?)`,
-                 [post.title, post.description, 1], // VALUES() 안의 물음표에 각각 매칭되어 들어간다.
+                 [post.title, post.description, post.author], // VALUES() 안의 물음표에 각각 매칭되어 들어간다.
                  function(error,result){
                      if(error){
                          throw error;
