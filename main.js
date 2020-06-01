@@ -92,16 +92,20 @@ var app = http.createServer(function(request,response){
                     throw error;
                 }
                 // 해당 컨텐츠 상세보기 출력하는 함수
-                db.query(`SELECT * FROM topic WHERE id=?`,[queryData.id],function(error2,topic){
+                // join 을 이용해서 author 테이블에 있는 저자 정보도 출력
+                db.query(`SELECT * FROM topic LEFT JOIN author ON topic.author_id=author.id 
+                WHERE topic.id=?`,[queryData.id],function(error2,topic){
                    if(error2){
                        throw error2;
                    } 
-                    //console.log(topic);
+                    console.log(topic);
                     var title = topic[0].title;
                     var description = topic[0].description; // 컨텐츠 내용
                     var list = template.List(topics); // topics : 전체 목록 데이터가 있는 테이블
                     var html = template.HTML(title,list,
-                                `<h2>${title}</h2>${description}`,
+                                `<h2>${title}</h2>
+                                ${description}
+                                <p>by ${topic[0].name}</p>`,
                                 `<a href="/create">create</a>
                                 <a href="/update?id=${queryData.id}">update</a>
                                 <form action="/delete_process" method="post" 
