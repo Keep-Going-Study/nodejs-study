@@ -98,7 +98,7 @@ var app = http.createServer(function(request,response){
                    if(error2){
                        throw error2;
                    } 
-                    console.log(topic);
+                    //console.log(topic);
                     var title = topic[0].title;
                     var description = topic[0].description; // 컨텐츠 내용
                     var list = template.List(topics); // topics : 전체 목록 데이터가 있는 테이블
@@ -131,7 +131,7 @@ var app = http.createServer(function(request,response){
             db.query('SELECT * FROM author', function(error2, authors){
                 
                 //console.log(topics);
-            
+                console.log(authors);
                 var title = 'Create';
                 var list = template.List(topics);
                 var html = template.HTML(title,list,
@@ -168,8 +168,8 @@ var app = http.createServer(function(request,response){
         });
         request.on('end',function(){
             var post = qs.parse(body);
-            console.log("post : ",post);
-            console.log("post.author : ",post.author);
+            //console.log("post : ",post);
+            //console.log("post.author : ",post.author);
             
             db.query(`
                 INSERT INTO topic (title, description, created, author_id)
@@ -197,14 +197,20 @@ var app = http.createServer(function(request,response){
                     throw error2;
                 }
                 
-                var list = template.List(topics);
-                var html = template.HTML(topic[0].title,list,` 
+               db.query('SELECT * FROM author', function(error3, authors){
+                    
+                    var list = template.List(topics);
+                    var html = template.HTML(topic[0].title,list,` 
                     <form action="/update_process" method="post">
                      <input type="hidden" name="id" value="${topic[0].id}"> 
                       <p><input type="text" name="title" placeholder="title" value="${topic[0].title}"></p>
                       <p>
                         <textarea name="description" placeholder="description">${topic[0].description}</textarea>
                       </p>
+                      <p>
+                        ${template.authorSelect(authors,topic[0].author_id)}
+                      </p>
+                      
                       <p>
                         <input type="submit">
                       </p>
@@ -215,6 +221,7 @@ var app = http.createServer(function(request,response){
                     
                 response.writeHead(200);
                 response.end(html);
+               });
             });
             
         });
@@ -227,10 +234,10 @@ var app = http.createServer(function(request,response){
         });
         request.on('end',function(){
             var post = qs.parse(body);  // 쿼리스트링을 객체 형식으로 리턴
-            console.log('body : ',body);
-            console.log('post : ',post);
-            db.query(`UPDATE topic SET title=?, description=?, author_id=1 WHERE id=?`,
-                    [post.title, post.description, post.id],
+            //console.log('body : ',body);
+            //console.log('post : ',post);
+            db.query(`UPDATE topic SET title=?, description=?, author_id=? WHERE id=?`,
+                    [post.title, post.description, post.author ,post.id],
                     function(error,result){
                         response.writeHead(302, {Location: `/?id=${post.id}`});
                         response.end();
