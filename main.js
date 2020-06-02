@@ -1,22 +1,16 @@
 var http = require('http');
-var fs = require('fs');
+//var fs = require('fs');
 var url = require('url'); // url 모듈을 변수에 저장
 var qs = require("querystring");
 
 var template = require('./lib/template_module.js');
-var path = require('path');
-var sanitizeHTML = require("sanitize-html");
+//var path = require('path');
+//var sanitizeHTML = require("sanitize-html");
 
-var mysql = require('mysql');
+var db = require("./lib/db");
 
-var db = mysql.createConnection({
-    host : 'localhost', // host : 데이터베이스 서버의 주소
-    user : 'soul4927',
-    password : '9815chs',
-    database : 'opentutorials' // 사용하려는 database ( USE 문이랑 같은 기능 ) 
-});
 
-db.connect(); // mysql 서버에 연결
+
 
 /* 리팩토링 이전 함수들 
 function templateHTML(title, list, body, control){
@@ -121,8 +115,9 @@ var app = http.createServer(function(request,response){
             }
     }
     
+    // /create 페이지에선 /create_process 로 넘길 form을 생성한다.  
     else if(pathname === '/create'){ // 접속경로가 create 일 때..
-        
+      
 
         // 목록들 출력과 create form 생성하는 기능
         db.query(`SELECT * FROM topic`, function(error,topics){
@@ -157,7 +152,10 @@ var app = http.createServer(function(request,response){
             
         });
     }
+    
+    // /create_process 에선 /create 에서 사용자에게 받은 form 데이터를 백엔드 처리한다.
     else if(pathname === '/create_process'){
+    
         var body = '';
         
         // data 이벤트 : request data가 넘어올 때 발생
@@ -185,6 +183,8 @@ var app = http.createServer(function(request,response){
         });
         
     }
+    
+    // /update 페이지에선 /update_process 로 넘길 form을 생성한다.  
     else if(pathname === '/update'){
         
         db.query(`SELECT * FROM topic`, function(error,topics){
@@ -227,7 +227,9 @@ var app = http.createServer(function(request,response){
         });
         
     }
-    else if(pathname === '/update_process'){ // update 처리
+    
+    // /update_process 에선 /update 에서 사용자에게 받은 form 데이터를 백엔드 처리한다.
+    else if(pathname === '/update_process'){ 
         var body = '';
         request.on('data', function(data){
             body += data;

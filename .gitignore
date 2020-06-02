@@ -1,2 +1,4 @@
 #Ignore all .c9 specific files
 /.c9/
+node_modules
+lib/db.js
