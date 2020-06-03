@@ -8,7 +8,7 @@ var template = require('./lib/template_module.js');
 //var sanitizeHTML = require("sanitize-html");
 
 var db = require("./lib/db");
-
+var topic = require("./lib/topic");
 
 
 
@@ -62,19 +62,7 @@ var app = http.createServer(function(request,response){
        
         // 쿼리스트링의 id 값이 없을 때 ( = 메인페이지에 접속했을 때)
         if(queryData.id === undefined){ 
-            // 목록들 출력하는 기능
-            db.query(`SELECT * FROM topic`, function(error,topics){
-                //console.log(topics);
-                var title = 'Welcome';
-                var description = 'Hello, Node.js';
-                var list = template.List(topics);
-                var html = template.HTML(title,list,
-                            `<h2>${title}</h2>${description}`,
-                            `<a href="/create">create</a>`);
-                // 홈페이지에선 create 버튼만 보이게끔
-                response.writeHead(200);
-                response.end(html);
-            });
+            topic.home(request, response);
         }
         
         // 쿼리스트링의 id 값이 있을 때 ( = 컨텐츠페이지에 접속했을 때)
