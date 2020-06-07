@@ -9,6 +9,7 @@ var template = require('./lib/template_module.js');
 
 var db = require("./lib/db");
 var topic = require("./lib/topic");
+var author = require('./lib/author');
 
 var app = http.createServer(function(request,response){
     var _url = request.url;
@@ -58,6 +59,11 @@ var app = http.createServer(function(request,response){
     
     else if(pathname === '/delete_process'){ // delete 처리
         topic.delete_process(request, response);
+    }
+    
+    // 저자관리 페이지
+    else if(pathname === '/author'){
+        author.home(request, response);
     }
     
     else{ // 접속경로(path)가 루트가 아니라면..
