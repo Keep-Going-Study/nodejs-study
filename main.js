@@ -71,6 +71,10 @@ var app = http.createServer(function(request,response){
         author.create_process(request, response);
     }
     
+    else if(pathname === '/author/update'){
+        author.update(request, response);
+    }
+    
     else{ // 접속경로(path)가 루트가 아니라면..
       response.writeHead(404);
       response.end('Not found');
