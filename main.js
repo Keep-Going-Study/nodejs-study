@@ -71,8 +71,14 @@ var app = http.createServer(function(request,response){
         author.create_process(request, response);
     }
     
+    // 저자목록의 저자 수정 form 생성
     else if(pathname === '/author/update'){
         author.update(request, response);
+    }
+    
+    // 저자목록 저자수정 백엔드 처리
+    else if(pathname === '/author/update_process'){
+      author.update_process(request, response);
     }
     
     else{ // 접속경로(path)가 루트가 아니라면..
