@@ -15,7 +15,9 @@ http.createServer(function(request, response){
               'tasty_cookie=strawberry',
               `Permanent_cookie=test; Max-Age=${60*60*24*30}`,
               'Secure_cookie=secure-test; Secure',
-              'HttpOnly_cookie=HttpOnly-test; HttpOnly'
+              'HttpOnly_cookie=HttpOnly-test; HttpOnly',
+              'Path_cookie=Path-test; Path=/cookie',
+              'Domain_cookie=Domain-test; Domain=o2.org'
               ]
      });
      
