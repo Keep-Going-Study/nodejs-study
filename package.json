@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start" : "pm2 start main.js --watch --ignore-watch='data/* sessions/*' --no-daemon"
+    "start": "pm2 start main.js --watch --ignore-watch='data/* sessions/*' --no-daemon"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Keep-Going-HyeonSoo/Node.js_Study#readme",
   "dependencies": {
+    "cookie": "^0.4.1",
     "mysql": "^2.18.1",
     "sanitize-html": "^1.23.0"
   }
