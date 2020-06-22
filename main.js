@@ -1,5 +1,5 @@
 var http = require('http');
-//var fs = require('fs');
+var fs = require('fs');
 var url = require('url'); // url 모듈을 변수에 저장
 var qs = require("querystring");
 
@@ -83,6 +83,27 @@ var app = http.createServer(function(request,response){
     
     else if(pathname === '/author/delete_process'){
         author.delete_process(request, response);
+    }
+    
+    else if(pathname === '/login'){
+        db.query(`SELECT * FROM topic`, function(error,topics){
+            //console.log(topics);
+            var title = 'Welcome';
+            var list = template.List(topics);
+            var html = template.HTML(title,list,
+                `  
+                  <h2> SIGN IN </h2>
+                  <form action="login_process" method="post">
+                    <p><input type="text" name="email" placeholder="email"></p>
+                    <p><input type="password" name="password" placeholder="password"></p>
+                    <p><input type="submit" value="join"></p>
+                  </form>
+                `,
+                `<a href="/create">create</a>`);
+            // 홈페이지에선 create 버튼만 보이게끔
+            response.writeHead(200);
+            response.end(html);
+        });
     }
     
     else{ // 접속경로(path)가 루트가 아니라면..
