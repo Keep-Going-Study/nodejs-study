@@ -93,7 +93,7 @@ var app = http.createServer(function(request,response){
             var html = template.HTML(title,list,
                 `  
                   <h2> SIGN IN </h2>
-                  <form action="login_process" method="post">
+                  <form action="/login_process" method="post">
                     <p><input type="text" name="email" placeholder="email"></p>
                     <p><input type="password" name="password" placeholder="password"></p>
                     <p><input type="submit" value="join"></p>
@@ -106,6 +106,30 @@ var app = http.createServer(function(request,response){
         });
     }
     
+    else if(pathname === '/login_process'){
+        var body = '';
+        request.on('data',function(data){
+            body += data;
+        });
+        request.on('end',function(){
+           var post = qs.parse(body);
+            if(post.email === 'chs' && post.password === '9815'){ // 로그인 성공 조건
+               response.writeHead(302,{ // 로그인 성공 시 로그인 쿠키 생성
+                   'Set-Cookie' : [
+                       `email=${post.email}`,
+                       `password=${post.password}`,
+                       `nickname=soul`
+                       ],
+                    Location: '/'
+               });
+                response.end();
+            } 
+            else{ // 로그인이 실패했을 시
+                response.end('login failed');
+            }
+        });
+    }
+        
     else{ // 접속경로(path)가 루트가 아니라면..
       response.writeHead(404);
       response.end('Not found');
