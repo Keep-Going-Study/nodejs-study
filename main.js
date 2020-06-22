@@ -10,8 +10,26 @@ var template = require('./lib/template_module.js');
 var db = require("./lib/db");
 var topic = require("./lib/topic");
 var author = require('./lib/author');
+var cookie = require('cookie');
+
+// 쿠키값을 통해 로그인 상태 체크
+function authIsOwner(request,response){
+    var isOwner = false;
+    var cookies = {};
+    if(request.headers.cookie){
+        cookies = cookie.parse(request.headers.cookie);
+    }
+    if(cookies.email === 'chs' && cookies.password === '9815'){
+        isOwner = true;
+    }
+    return isOwner;
+}
 
 var app = http.createServer(function(request,response){
+    
+    var isOwner = authIsOwner(request,response);
+    console.log(isOwner);
+    
     var _url = request.url;
     // _url(request.url) 에는 path 이하 주소가 들어감.
     //  ex ) http://localhost:3000/?id=HTML => request.url == /?id=HTML
