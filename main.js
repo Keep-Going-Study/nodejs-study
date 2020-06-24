@@ -10,25 +10,15 @@ var template = require('./lib/template_module.js');
 var db = require("./lib/db");
 var topic = require("./lib/topic");
 var author = require('./lib/author');
+var auth = require('./lib/auth.js');
 var cookie = require('cookie');
 
-// 쿠키값을 통해 로그인 상태 체크
-function authIsOwner(request,response){
-    var isOwner = false;
-    var cookies = {};
-    if(request.headers.cookie){
-        cookies = cookie.parse(request.headers.cookie);
-    }
-    if(cookies.email === 'chs' && cookies.password === '9815'){
-        isOwner = true;
-    }
-    return isOwner;
-}
+
 
 var app = http.createServer(function(request,response){
     
-    var isOwner = authIsOwner(request,response);
-    console.log(isOwner);
+    //var isOwner = auth.authIsOwner(request,response);
+    //console.log(isOwner);
     
     var _url = request.url;
     // _url(request.url) 에는 path 이하 주소가 들어감.
@@ -104,48 +94,11 @@ var app = http.createServer(function(request,response){
     }
     
     else if(pathname === '/login'){
-        db.query(`SELECT * FROM topic`, function(error,topics){
-            //console.log(topics);
-            var title = 'Welcome';
-            var list = template.List(topics);
-            var html = template.HTML(title,list,
-                `  
-                  <h2> SIGN IN </h2>
-                  <form action="/login_process" method="post">
-                    <p><input type="text" name="email" placeholder="email"></p>
-                    <p><input type="password" name="password" placeholder="password"></p>
-                    <p><input type="submit" value="join"></p>
-                  </form>
-                `,
-                `<a href="/create">create</a>`);
-            // 홈페이지에선 create 버튼만 보이게끔
-            response.writeHead(200);
-            response.end(html);
-        });
+        auth.login(request,response);
     }
     
     else if(pathname === '/login_process'){
-        var body = '';
-        request.on('data',function(data){
-            body += data;
-        });
-        request.on('end',function(){
-           var post = qs.parse(body);
-            if(post.email === 'chs' && post.password === '9815'){ // 로그인 성공 조건
-               response.writeHead(302,{ // 로그인 성공 시 로그인 쿠키 생성
-                   'Set-Cookie' : [
-                       `email=${post.email}`,
-                       `password=${post.password}`,
-                       `nickname=soul`
-                       ],
-                    Location: '/'
-               });
-                response.end();
-            } 
-            else{ // 로그인이 실패했을 시
-                response.end('login failed');
-            }
-        });
+        auth.login_process(request,response);  
     }
         
     else{ // 접속경로(path)가 루트가 아니라면..
