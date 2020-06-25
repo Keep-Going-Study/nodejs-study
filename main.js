@@ -47,49 +47,59 @@ var app = http.createServer(function(request,response){
     
     // /create 페이지에선 /create_process 로 넘길 form을 생성한다.  
     else if(pathname === '/create'){ // 접속경로가 create 일 때..
+        auth.AccessControl(request,response); // 접근제어
         topic.create(request, response);
     }
     
     // /create_process 에선 /create 에서 사용자에게 받은 form 데이터를 백엔드 처리한다.
     else if(pathname === '/create_process'){
+        auth.AccessControl(request,response); // 접근제어
         topic.create_process(request, response);
     }
     
     // /update 페이지에선 /update_process 로 넘길 form을 생성한다.  
     else if(pathname === '/update'){
+        auth.AccessControl(request,response); // 접근제어
         topic.update(request, response);
     }
     
     // /update_process 에선 /update 에서 사용자에게 받은 form 데이터를 백엔드 처리한다.
     else if(pathname === '/update_process'){ 
+        auth.AccessControl(request,response); // 접근제어
         topic.update_process(request, response);
     }
     
     else if(pathname === '/delete_process'){ // delete 처리
+        auth.AccessControl(request,response); // 접근제어
         topic.delete_process(request, response);
     }
     
     // 저자관리 페이지
     else if(pathname === '/author'){
+        auth.AccessControl(request,response); // 접근제어
         author.home(request, response);
     }
     
     // 저자목록에 저자 추가 기능
     else if(pathname === '/author/create_process'){
+        auth.AccessControl(request,response); // 접근제어
         author.create_process(request, response);
     }
     
     // 저자목록의 저자 수정 form 생성
     else if(pathname === '/author/update'){
+        auth.AccessControl(request,response); // 접근제어
         author.update(request, response);
     }
     
     // 저자목록 저자수정 백엔드 처리
     else if(pathname === '/author/update_process'){
-      author.update_process(request, response);
+        auth.AccessControl(request,response); // 접근제어
+        author.update_process(request, response);
     }
     
     else if(pathname === '/author/delete_process'){
+        auth.AccessControl(request,response); // 접근제어
         author.delete_process(request, response);
     }
     
@@ -99,6 +109,11 @@ var app = http.createServer(function(request,response){
     
     else if(pathname === '/login_process'){
         auth.login_process(request,response);  
+    }
+    
+    else if(pathname === '/logout_process'){
+        auth.AccessControl(request,response); // 접근제어
+        auth.logout_process(request,response);  
     }
         
     else{ // 접속경로(path)가 루트가 아니라면..
